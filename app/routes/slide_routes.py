@@ -231,3 +231,76 @@ def update_slide(presentation_id, slide_id):
         "message": "Slide updated successfully",
         "slide": slide.to_dict()
     }, 200
+
+@slide_bp.get("/<int:presentation_id>/slides")
+def list_slides(presentation_id):
+
+    connection = get_connection(
+        current_app.config["DATABASE_PATH"]
+    )
+
+    try:
+        if not presentation_exists(connection, presentation_id):
+            return {
+                "error": "Presentation not found."
+            }, 404
+
+        rows = connection.execute(
+            """
+            SELECT id, presentation_id, slide_order, title,
+                   content, created_at, updated_at
+            FROM slides
+            WHERE presentation_id = ?
+            ORDER BY slide_order ASC, id ASC
+            """,
+            (presentation_id,)
+        ).fetchall()
+
+        slides = [row_to_slide(row).to_dict() for row in rows]
+
+    finally:
+        connection.close()
+
+    return {
+        "presentation_id": presentation_id,
+        "count": len(slides),
+        "slides": slides
+    }, 200
+
+
+@slide_bp.get("/<int:presentation_id>/slides/<int:slide_id>")
+def get_slide(presentation_id, slide_id):
+
+    connection = get_connection(
+        current_app.config["DATABASE_PATH"]
+    )
+
+    try:
+        if not presentation_exists(connection, presentation_id):
+            return {
+                "error": "Presentation not found."
+            }, 404
+
+        row = connection.execute(
+            """
+            SELECT id, presentation_id, slide_order, title,
+                   content, created_at, updated_at
+            FROM slides
+            WHERE id = ? AND presentation_id = ?
+            """,
+            (slide_id, presentation_id)
+        ).fetchone()
+
+        if row is None:
+            return {
+                "error": "Slide not found."
+            }, 404
+
+        slide = row_to_slide(row)
+
+    finally:
+        connection.close()
+
+    return {
+        "slide": slide.to_dict()
+    }, 200
