@@ -304,3 +304,42 @@ def get_slide(presentation_id, slide_id):
     return {
         "slide": slide.to_dict()
     }, 200
+@slide_bp.delete("/<int:presentation_id>/slides/<int:slide_id>")
+def delete_slide(presentation_id, slide_id):
+
+    connection = get_connection(
+        current_app.config["DATABASE_PATH"]
+    )
+
+    try:
+        if not presentation_exists(connection, presentation_id):
+            return {
+                "error": "Presentation not found."
+            }, 404
+
+        existing = connection.execute(
+            """
+            SELECT id FROM slides
+            WHERE id = ? AND presentation_id = ?
+            """,
+            (slide_id, presentation_id)
+        ).fetchone()
+
+        if existing is None:
+            return {
+                "error": "Slide not found."
+            }, 404
+
+        connection.execute(
+            "DELETE FROM slides WHERE id = ? AND presentation_id = ?",
+            (slide_id, presentation_id)
+        )
+
+        connection.commit()
+
+    finally:
+        connection.close()
+
+    return {
+        "message": "Slide deleted successfully"
+    }, 200
