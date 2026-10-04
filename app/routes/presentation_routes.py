@@ -188,3 +188,42 @@ def get_presentation(presentation_id):
     return {
         "presentation": presentation
     }, 200
+@presentation_bp.delete("/<int:presentation_id>")
+def delete_presentation(presentation_id):
+
+    connection = get_connection(
+        current_app.config["DATABASE_PATH"]
+    )
+
+    try:
+        row = connection.execute(
+            """
+            SELECT id FROM presentations
+            WHERE id = ?
+            """,
+            (presentation_id,)
+        ).fetchone()
+
+        if row is None:
+            return {
+                "error": "Presentation not found."
+            }, 404
+
+        connection.execute(
+            "DELETE FROM slides WHERE presentation_id = ?",
+            (presentation_id,)
+        )
+
+        connection.execute(
+            "DELETE FROM presentations WHERE id = ?",
+            (presentation_id,)
+        )
+
+        connection.commit()
+
+    finally:
+        connection.close()
+
+    return {
+        "message": "Presentation deleted successfully"
+    }, 200
