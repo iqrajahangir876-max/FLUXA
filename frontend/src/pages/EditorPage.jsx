@@ -50,6 +50,12 @@ export default function EditorPage() {
     selected &&
     (current.title !== (selected.title || "") || current.content !== (selected.content || ""));
 
+  // True if ANY slide has unsaved edits (used for the leave-page warning)
+  const anyUnsaved = slides.some((s) => {
+    const d = drafts[s.id];
+    return d && (d.title !== (s.title || "") || d.content !== (s.content || ""));
+  });
+
   // Slide navigation (T17)
   const index = selected ? slides.findIndex((s) => s.id === selected.id) : -1;
   const hasPrev = index > 0;
@@ -75,6 +81,12 @@ export default function EditorPage() {
     setDrafts((d) => ({ ...d, [selected.id]: { ...current, [field]: value } }));
   }
 
+  // T18: throw away unsaved edits of the selected slide
+  function discard() {
+    setStatus("");
+    setDrafts(({ [selected.id]: _removed, ...rest }) => rest);
+  }
+
   async function run(action) {
     try {
       setError("");
@@ -91,6 +103,29 @@ export default function EditorPage() {
       setDrafts(({ [slide.id]: _removed, ...rest }) => rest);
       setStatus("Saved");
     });
+
+  // T18: Ctrl+S (or Cmd+S) saves the current slide
+  useEffect(() => {
+    function onSaveKey(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (dirty) save();
+      }
+    }
+    window.addEventListener("keydown", onSaveKey);
+    return () => window.removeEventListener("keydown", onSaveKey);
+  });
+
+  // T18: warn before closing or refreshing the tab with unsaved edits
+  useEffect(() => {
+    function onBeforeUnload(e) {
+      if (!anyUnsaved) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [anyUnsaved]);
 
   const addSlide = () =>
     run(async () => {
@@ -186,6 +221,9 @@ export default function EditorPage() {
                   placeholder={"Write text, or start lines with “- ” for bullets"}
                   onChange={(e) => edit("content", e.target.value)}
                 />
+                <small className="muted field-hint" data-testid="content-count">
+                  {current.content.length} characters
+                </small>
               </div>
               <div className="actions">
                 <span className="muted status" aria-live="polite">
@@ -196,6 +234,9 @@ export default function EditorPage() {
                   onConfirm={removeSlide}
                   className="btn btn-danger-outline"
                 />
+                <button type="button" className="btn btn-outline" onClick={discard} disabled={!dirty}>
+                  Discard changes
+                </button>
                 <button type="submit" className="btn" disabled={!dirty}>Save changes</button>
               </div>
             </form>
