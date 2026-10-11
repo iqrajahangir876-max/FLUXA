@@ -27,6 +27,8 @@ export const api = {
   getPresentation: (id) => request(`/presentations/${id}`),
   createPresentation: (body) => request("/presentations", send("POST", body)),
   deletePresentation: (id) => request(`/presentations/${id}`, send("DELETE")),
+  generateOutline: (body) => request("/presentations/generate/outline", send("POST", body)),
+  generatePresentation: (body) => request("/presentations/generate", send("POST", body)),
   addSlide: (pid, body) => request(`/presentations/${pid}/slides`, send("POST", body)),
   updateSlide: (pid, sid, body) =>
     request(`/presentations/${pid}/slides/${sid}`, send("PUT", body)),
