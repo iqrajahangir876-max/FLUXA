@@ -1,10 +1,17 @@
 const BULLET = /^[-•*]\s+/;
 
-export default function SlidePreview({ title, content, slideNumber, totalSlides }) {
+export default function SlidePreview({
+  title,
+  content,
+  slideNumber,
+  totalSlides,
+  theme = "midnight",
+  layout = "standard",
+}) {
   const lines = (content || "").split("\n").filter((line) => line.trim() !== "");
 
   return (
-    <div className="preview" data-testid="slide-preview">
+    <div className={`preview theme-${theme} layout-${layout}`} data-testid="slide-preview">
       <div className="preview-inner">
         <h2>{title || "Untitled slide"}</h2>
         <div className="preview-body">

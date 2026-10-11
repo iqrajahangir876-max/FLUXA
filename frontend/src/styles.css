@@ -152,3 +152,38 @@ input:focus, textarea:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rg
 .slide-nav { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; margin-top: 0.9rem; }
 .slide-nav .muted { margin: 0; font-size: 0.9rem; }
 .field-hint { margin: 0; text-align: right; font-size: 0.8rem; }
+
+/* Theme and layout options (T19) */
+.design-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.design-row .field { flex: 1; min-width: 140px; }
+select {
+  width: 100%; padding: 0.7rem 0.85rem; border: 1px solid var(--line); border-radius: 10px;
+  font: inherit; color: var(--ink); background: #fff;
+}
+select:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgba(147, 171, 214, 0.3); outline: none; }
+
+.preview.theme-ocean { background: linear-gradient(135deg, #0b4f6c, #01baef); }
+.preview.theme-ocean h2 { border-left-color: #fbfbff; }
+.preview.theme-ocean .preview-body p { color: #e8f7ff; }
+.preview.theme-ocean .preview-body p.bullet::before { background: #fbfbff; }
+.preview.theme-ocean .preview-count { color: #e8f7ff; }
+
+.preview.theme-sunset { background: linear-gradient(135deg, #5b2a86, #e5707e); }
+.preview.theme-sunset h2 { border-left-color: #ffd6a5; }
+.preview.theme-sunset .preview-body p { color: #fff0f5; }
+.preview.theme-sunset .preview-body p.bullet::before { background: #ffd6a5; }
+.preview.theme-sunset .preview-count { color: #fff0f5; }
+
+.preview.theme-light { background: #ffffff; border: 1px solid var(--line); }
+.preview.theme-light h2 { color: var(--navy); }
+.preview.theme-light .preview-body p { color: var(--ink); }
+.preview.theme-light .preview-body p.bullet::before { background: var(--orchid); }
+.preview.theme-light .preview-count { color: var(--slate); }
+
+.preview.layout-centered .preview-inner { display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.preview.layout-centered h2 { border-left: 0; padding-left: 0; }
+.preview.layout-centered .preview-body p.bullet { padding-left: 0; }
+.preview.layout-centered .preview-body p.bullet::before { display: none; }
+
+.preview.layout-two-column .preview-body { column-count: 2; column-gap: 4cqw; }
+.preview.layout-two-column .preview-body p { break-inside: avoid; }

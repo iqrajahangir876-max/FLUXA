@@ -5,6 +5,38 @@ import { usePresentations } from "../PresentationsContext.jsx";
 import ConfirmButton from "../components/ConfirmButton.jsx";
 import SlidePreview from "../components/SlidePreview.jsx";
 
+const THEMES = [
+  ["midnight", "Midnight"],
+  ["ocean", "Ocean"],
+  ["sunset", "Sunset"],
+  ["light", "Light"],
+];
+
+const LAYOUTS = [
+  ["standard", "Standard"],
+  ["centered", "Centered"],
+  ["two-column", "Two columns"],
+];
+
+// T19: theme and layout choices are kept in the browser (localStorage)
+function loadDesign(id) {
+  try {
+    const raw = localStorage.getItem(`fluxa-design-${id}`);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return { theme: parsed.theme || "midnight", layouts: parsed.layouts || {} };
+  } catch {
+    return { theme: "midnight", layouts: {} };
+  }
+}
+
+function saveDesign(id, design) {
+  try {
+    localStorage.setItem(`fluxa-design-${id}`, JSON.stringify(design));
+  } catch {
+    // storage unavailable: choices just won't be remembered
+  }
+}
+
 export default function EditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -17,6 +49,11 @@ export default function EditorPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
+  const [design, setDesign] = useState(() => loadDesign(id));
+
+  useEffect(() => {
+    setDesign(loadDesign(id));
+  }, [id]);
 
   const load = useCallback(
     async (preferId) => {
@@ -56,6 +93,21 @@ export default function EditorPage() {
     return d && (d.title !== (s.title || "") || d.content !== (s.content || ""));
   });
 
+  // T19: theme is per presentation, layout is per slide
+  const layout = selected ? design.layouts[selected.id] || "standard" : "standard";
+
+  function changeTheme(theme) {
+    const next = { ...design, theme };
+    setDesign(next);
+    saveDesign(id, next);
+  }
+
+  function changeLayout(value) {
+    const next = { ...design, layouts: { ...design.layouts, [selected.id]: value } };
+    setDesign(next);
+    saveDesign(id, next);
+  }
+
   // Slide navigation (T17)
   const index = selected ? slides.findIndex((s) => s.id === selected.id) : -1;
   const hasPrev = index > 0;
@@ -66,7 +118,7 @@ export default function EditorPage() {
   useEffect(() => {
     function onKey(e) {
       const tag = e.target.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       if (e.key === "ArrowLeft" && index > 0) setSelectedId(slides[index - 1].id);
       if (e.key === "ArrowRight" && index >= 0 && index < slides.length - 1) {
         setSelectedId(slides[index + 1].id);
@@ -243,11 +295,39 @@ export default function EditorPage() {
 
             <div className="card">
               <h3>Live preview</h3>
+              <div className="design-row">
+                <div className="field">
+                  <label htmlFor="theme-select">Theme</label>
+                  <select
+                    id="theme-select"
+                    value={design.theme}
+                    onChange={(e) => changeTheme(e.target.value)}
+                  >
+                    {THEMES.map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="layout-select">Layout</label>
+                  <select
+                    id="layout-select"
+                    value={layout}
+                    onChange={(e) => changeLayout(e.target.value)}
+                  >
+                    {LAYOUTS.map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <SlidePreview
                 title={current.title}
                 content={current.content}
                 slideNumber={index + 1}
                 totalSlides={slides.length}
+                theme={design.theme}
+                layout={layout}
               />
               <div className="slide-nav">
                 <button type="button" className="btn btn-outline" onClick={goPrev} disabled={!hasPrev}>
