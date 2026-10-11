@@ -1,6 +1,6 @@
 const BULLET = /^[-•*]\s+/;
 
-export default function SlidePreview({ title, content }) {
+export default function SlidePreview({ title, content, slideNumber, totalSlides }) {
   const lines = (content || "").split("\n").filter((line) => line.trim() !== "");
 
   return (
@@ -8,6 +8,7 @@ export default function SlidePreview({ title, content }) {
       <div className="preview-inner">
         <h2>{title || "Untitled slide"}</h2>
         <div className="preview-body">
+          {lines.length === 0 && <p className="preview-empty">No content yet</p>}
           {lines.map((line, i) =>
             BULLET.test(line) ? (
               <p key={i} className="bullet">{line.replace(BULLET, "")}</p>
@@ -17,6 +18,11 @@ export default function SlidePreview({ title, content }) {
           )}
         </div>
       </div>
+      {slideNumber && totalSlides ? (
+        <span className="preview-count" data-testid="preview-count">
+          {slideNumber} / {totalSlides}
+        </span>
+      ) : null}
     </div>
   );
 }
