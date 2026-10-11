@@ -149,3 +149,5 @@ input:focus, textarea:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rg
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+.slide-nav { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; margin-top: 0.9rem; }
+.slide-nav .muted { margin: 0; font-size: 0.9rem; }

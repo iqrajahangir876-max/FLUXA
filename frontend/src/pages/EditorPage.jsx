@@ -50,6 +50,26 @@ export default function EditorPage() {
     selected &&
     (current.title !== (selected.title || "") || current.content !== (selected.content || ""));
 
+  // Slide navigation (T17)
+  const index = selected ? slides.findIndex((s) => s.id === selected.id) : -1;
+  const hasPrev = index > 0;
+  const hasNext = index >= 0 && index < slides.length - 1;
+  const goPrev = () => hasPrev && setSelectedId(slides[index - 1].id);
+  const goNext = () => hasNext && setSelectedId(slides[index + 1].id);
+
+  useEffect(() => {
+    function onKey(e) {
+      const tag = e.target.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === "ArrowLeft" && index > 0) setSelectedId(slides[index - 1].id);
+      if (e.key === "ArrowRight" && index >= 0 && index < slides.length - 1) {
+        setSelectedId(slides[index + 1].id);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [slides, index]);
+
   function edit(field, value) {
     setStatus("");
     setDrafts((d) => ({ ...d, [selected.id]: { ...current, [field]: value } }));
@@ -81,8 +101,8 @@ export default function EditorPage() {
 
   const removeSlide = () =>
     run(async () => {
-      const index = slides.findIndex((s) => s.id === selected.id);
-      const neighbour = slides[index + 1] || slides[index - 1];
+      const i = slides.findIndex((s) => s.id === selected.id);
+      const neighbour = slides[i + 1] || slides[i - 1];
       await api.deleteSlide(id, selected.id);
       await load(neighbour ? neighbour.id : undefined);
       await refresh();
@@ -183,11 +203,22 @@ export default function EditorPage() {
             <div className="card">
               <h3>Live preview</h3>
               <SlidePreview
-  title={current.title}
-  content={current.content}
-  slideNumber={slides.findIndex((s) => s.id === selected.id) + 1}
-  totalSlides={slides.length}
-/>
+                title={current.title}
+                content={current.content}
+                slideNumber={index + 1}
+                totalSlides={slides.length}
+              />
+              <div className="slide-nav">
+                <button type="button" className="btn btn-outline" onClick={goPrev} disabled={!hasPrev}>
+                  ← Previous
+                </button>
+                <span className="muted" data-testid="slide-position">
+                  Slide {index + 1} of {slides.length}
+                </span>
+                <button type="button" className="btn btn-outline" onClick={goNext} disabled={!hasNext}>
+                  Next →
+                </button>
+              </div>
             </div>
           </section>
         ) : (
