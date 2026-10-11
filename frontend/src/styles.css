@@ -120,13 +120,16 @@ input:focus, textarea:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rg
 @media (min-width: 1250px) { .editor-pane { grid-template-columns: 1fr 1fr; align-items: start; } }
 
 /* Slide preview (16:9, scales with its container) */
-.preview { container-type: inline-size; aspect-ratio: 16 / 9; width: 100%; border-radius: 12px; overflow: hidden; margin-top: 0.5rem;
+.preview { position: relative; container-type: inline-size; aspect-ratio: 16 / 9; width: 100%; border-radius: 12px; overflow: hidden; margin-top: 0.5rem;
   background: linear-gradient(135deg, var(--navy), var(--slate)); color: #fff; box-shadow: var(--shadow); }
 .preview-inner { height: 100%; padding: 6cqw; overflow: hidden; }
 .preview h2 { color: #fff; font-size: 5.5cqw; margin-bottom: 2.5cqw; border-left: 0.8cqw solid var(--orchid); padding-left: 2cqw; }
 .preview-body p { margin: 0 0 1.4cqw; font-size: 3.2cqw; line-height: 1.4; color: var(--blush); }
 .preview-body p.bullet { position: relative; padding-left: 3.5cqw; }
 .preview-body p.bullet::before { content: ""; position: absolute; left: 0.6cqw; top: 1.5cqw; width: 1.2cqw; height: 1.2cqw; border-radius: 50%; background: var(--sky); }
+.preview-empty { opacity: 0.6; font-style: italic; }
+.preview-count { position: absolute; right: 2.5cqw; bottom: 2cqw; font-size: 2.2cqw; color: var(--sky); }
+
 .empty { text-align: center; padding: 3rem 1rem; }
 
 @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

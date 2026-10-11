@@ -182,7 +182,12 @@ export default function EditorPage() {
 
             <div className="card">
               <h3>Live preview</h3>
-              <SlidePreview title={current.title} content={current.content} />
+              <SlidePreview
+  title={current.title}
+  content={current.content}
+  slideNumber={slides.findIndex((s) => s.id === selected.id) + 1}
+  totalSlides={slides.length}
+/>
             </div>
           </section>
         ) : (
